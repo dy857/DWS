@@ -3,7 +3,7 @@
 
 void turn_yellow(){
 	printf("%c[1;33m",27);
-	sleep(5);
+	sleep(2);
 	system("reset");
 }
 
@@ -35,7 +35,28 @@ void main(){
 		}else
 		// Main Controller
 		{
+			if(mo_info==0 && btn=='c') { time_mode(); }
+			else if(mo_info==TIME_MODE)
+			{
+				if(st_info==0 && btn=='a') { sec_set(); }
+				if(st_info==SEC_SET && btn=='c') { hour_set(); }
+				if(st_info==HOUR_SET && btn=='c') { minute_set(); }
+				if(st_info==MINUTE_SET && btn=='c') { year_set(); }
+				if(st_info==YEAR_SET && btn=='c') { month_set(); }
+				if(st_info==MONTH_SET && btn=='c') { day_set(); } 
+				if(st_info==DAY_SET && btn=='c') { sec_set(); }
+				if(st_info==DAY_SET && btn=='a') { time_mode(); }
+				//if(btn=='b' && !max) { plus_one(st_info); }
+				//if(btn=='b' && max) { set_min(st_info); }
+			}
+
+			else if(mo_info==TIME_MODE && btn=='c') { alarm_mode(); }
+			else if(mo_info==ALARM_MODE)
+			{
+				if(btn=='b') { alarm_indicator(); }
 			
+			}
+
 		}
 		// Backlight Controller
 		if(btn=='d'){
