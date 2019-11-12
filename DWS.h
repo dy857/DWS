@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <termios.h>
-#include <conio.h>
+//#include <conio.h>
 #define TIME_MODE 1
 #define SEC_SET 2
 #define MINUTE_SET 3
@@ -26,7 +26,7 @@ typedef struct alarm_information{
 	bool info;	// 알람여부
 	int hour;
 	int min;
-} alarm_info;
+}alarm_info;
 
 int st_info=0;
 char btn;

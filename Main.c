@@ -8,6 +8,8 @@ void turn_yellow(){
 }
 
 void current(){
+	current_time =time(NULL);
+	struct tm current_tm=*localtime(&current_time);
 	system("clear");
 	printf("현재시간: %d-%d-%d %d:%d:%d\n",current_tm.tm_year+1900,current_tm.tm_mon+1,current_tm.tm_mday,current_tm.tm_hour,current_tm.tm_min,current_tm.tm_sec);
 }
@@ -16,8 +18,9 @@ void turn_on(){
 }
 void main(){
 	//
-	alarm_info.alarm_power=false;
-	alarm_info.info=false;
+	alarm_info alarm;
+	alarm.alarm_power = false;
+	alarm.info = false;
 	// 초기 시간 설정 바꾸기
 	current_time =time(NULL);
 	struct tm current_tm=*localtime(&current_time);
@@ -27,7 +30,7 @@ void main(){
 			btn=getch();
 		}
 		// Beep Controller
-		if(alarm_info.alarm_power==on && alarm_info.hour==current_tm.tm_hour && alarm_info.min== current_tm.tm_min){
+		if(alarm.alarm_power==true && alarm.hour==current_tm.tm_hour && alarm.min== current_tm.tm_min){
 			
 		}else
 		// Main Controller
@@ -39,7 +42,7 @@ void main(){
 			turn_yellow();
 		}
 	current();
-	sleep(1)
+	sleep(1);
 	}
 
 }
