@@ -6,26 +6,32 @@
 #include <time.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include<termios.h>
-
-#define SEC_SET 1
-#define HOUR_SET 2
+#include <termios.h>
+#include <conio.h>
+#define TIME_MODE 1
+#define SEC_SET 2
 #define MINUTE_SET 3
 #define YEAR_SET 4
 #define MONTH_SET 5
 #define DAY_SET 6
+#define ALARM_MODE 7
+#define STOPWATCH_MODE 8
+#define START 9
+#define STOP 10
+#define LAP_TIME 11
+
 
 typedef struct alarm_information{
-	bool alarm_power;
+	bool alarm_power; // 알람 켜짐 여부
+	bool info;	// 알람여부
 	int hour;
 	int min;
 } alarm_info;
 
-pthread_t time_thread;
-int flag;
+int st_info=0;
 char btn;
 time_t current_time;
-pthread_mutex_t mutex;
+
 
 void plus_one();
 void set_min();
