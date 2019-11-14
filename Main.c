@@ -35,19 +35,18 @@ void main() {
 
 				if(st_info == 0 ){time_mode();}
 				if (st_info == SEC_SET) {  sec_set(); }
-				if (st_info == HOUR_SET && btn =='c') { hour_set(); }
-				if (st_info == MINUTE_SET && btn == 'c') { minute_set(); }
-				if (st_info == YEAR_SET && btn == 'c') { year_set(); }
-				if (st_info == MONTH_SET  && btn == 'c') { month_set(); }
-				if (st_info == DAY_SET && btn == 'c') { day_set(); }
+				if (st_info == HOUR_SET) { hour_set(); }
+				if (st_info == MINUTE_SET) { minute_set(); }
+				if (st_info == YEAR_SET) { year_set(); }
+				if (st_info == MONTH_SET) { month_set(); }
+				if (st_info == DAY_SET) { day_set(); }
 
 			}
 			else if (mo_info == ALARM_MODE) {
 
-				alarm_mode();
-
-				if (st_info == HOUR_SET && btn == 'a') { hour_set(); }
-				if (st_info == MINUTE_SET && btn == 'c') { minute_set(); }
+				if(st_info == 0){alarm_mode();}
+				if (st_info == HOUR_SET) { hour_set(); }
+				if (st_info == MINUTE_SET ) { minute_set(); }
 				if (btn == 'b') { alarm_indicator(); }
 
 			}

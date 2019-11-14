@@ -29,18 +29,15 @@ void time_mode()
 {
 	
 	if (kbhit() == 1) {
-		
 		if (btn == 'a') {
 			st_info = SEC_SET;
-			btn=0;
 		}
 		if (btn == 'c') {
-			st_info = ALARM_MODE;
+			mo_info = ALARM_MODE;
 		}
 	}
 	display_command = PRINT_TIME_MODE;
-	printf("%d \n",st_info);
-	printf("타임모드");
+	printf("타임모드\n");
 }
 
 void sec_set()
@@ -61,7 +58,7 @@ void sec_set()
 	}
 	//display
 	display_command = PRINT_SEC_SET;
-	printf("초");
+	printf("초\n");
 }
 
 void hour_set()
@@ -81,7 +78,7 @@ void hour_set()
 	}
 	//display
 	display_command = PRINT_HOUR_SET;
-	printf("시간");
+	printf("시간\n");
 }
 
 void minute_set()
@@ -106,7 +103,7 @@ void minute_set()
 	}
 	//display
 	display_command = PRINT_MINUTE_SET;
-	printf("분");
+	printf("분\n");
 }
 
 void year_set()
@@ -126,7 +123,7 @@ void year_set()
 	}
 	//display
 	display_command = PRINT_YEAR_SET;
-	printf("연");
+	printf("연\n");
 }
 
 void month_set()
@@ -146,7 +143,7 @@ void month_set()
 	}
 	//display
 	display_command = PRINT_MONTH_SET;
-	printf("달");
+	printf("달\n");
 }
 
 void day_set()
@@ -168,7 +165,7 @@ void day_set()
 	}
 	//display
 	display_command = PRINT_DAY_SET;
-	printf("일");
+	printf("일\n");
 }
 
 	void plus_one(int st_info)
@@ -233,7 +230,7 @@ void day_set()
 		}
 		//display
 		display_command = PRINT_MINUTE_SET;
-
+		printf("알람모드\n");
 	}
 	void alarm_indicator()
 	{
@@ -268,11 +265,13 @@ int getch()
 	return c;
 }
 
+
+
 int kbhit()
 {
 	struct termios oldt, newt;
-	int oldf;
-
+	int oldf;	
+	
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
 	newt.c_lflag &= ~(ICANON | ECHO);
@@ -281,15 +280,11 @@ int kbhit()
 	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
 
 	btn = getch();
-
+	
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 	fcntl(STDIN_FILENO, F_SETFL, oldf);
 
-	if (btn != EOF)
-	{
-		ungetc(btn, stdin);
-		return 1;
-	}
+	if (btn != EOF){return 1;}
 	
 	return 0;
 }
