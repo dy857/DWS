@@ -1,142 +1,300 @@
 #include "DWS.h"
 
-void turn_yellow(){
-	printf("%c[1;33m",27);
-	sleep(2);
-	system("reset");
-}
+int st_info = 0;
+int mo_info = TIME_MODE;
+int display_command = 0;
 
-void current(){
-	current_time =time(NULL);
-	struct tm current_tm=*localtime(&current_time);
+
+void current() {
+	current_time = time(NULL);
+	current_tm = *localtime(&current_time);
 	system("clear");
-	printf("현재시간: %d-%d-%d %d:%d:%d\n",current_tm.tm_year+1900,current_tm.tm_mon+1,current_tm.tm_mday,current_tm.tm_hour,current_tm.tm_min,current_tm.tm_sec);
+	printf("현재시간: %d-%d-%d %d:%d:%d\n", current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
 }
 
-void turn_on(){
-	
+int date(int year, int month)
+{
+	int mdays[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+	if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0)))//윤년 판단 
+	{
+		mdays[1] = 29;//2월달의 날 수를 29로 설정 
+	}
+
+	//month는 mdays의 인덱스로 사용해서 실제 출력할 때는 1을더해서 출력합니다. 
+	int day = mdays[month];
+	return day;
 }
 
 void time_mode()
 {
-	btn=' ';
-	mo_info = TIME_MODE;
-	st_info = 0;
+	
+	if (kbhit() == 1) {
+		
+		if (btn == 'a') {
+			st_info = SEC_SET;
+			btn=0;
+		}
+		if (btn == 'c') {
+			st_info = ALARM_MODE;
+		}
+	}
+	display_command = PRINT_TIME_MODE;
+	printf("%d \n",st_info);
+	printf("타임모드");
 }
 
 void sec_set()
 {
-	btn=' ';
-	st_info = SEC_SET;
-	//깜빡깜빡
-	printf("초 바꾸는 중");
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = 0;
+		}
+		if (btn == 'b') {
+			if (current_tm.tm_sec == 59) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c') {
+			st_info = HOUR_SET;
+		}
+
+	}
+	//display
+	display_command = PRINT_SEC_SET;
+	printf("초");
 }
 
 void hour_set()
 {
-	btn=' ';
-	st_info = HOUR_SET;
-	//깜빡깜빡
-	printf("시 바꾸는 중");
-	
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = 0;
+		}
+		if (btn == 'b') {
+			if (current_tm.tm_hour == 23) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c') {
+			st_info = MINUTE_SET;
+		}
+	}
+	//display
+	display_command = PRINT_HOUR_SET;
+	printf("시간");
 }
 
 void minute_set()
 {
-	btn=' ';
-	st_info = MINUTE_SET;
-	//깜빡깜빡
-	printf("분 바꾸는 중");
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = 0;
+		}
+		if (btn == 'b') {
+			if (current_tm.tm_min == 59) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c' && mo_info == TIME_MODE) {
+			st_info = YEAR_SET;
+		}
+		if (btn == 'c' && mo_info == ALARM_MODE) {
+			st_info = HOUR_SET;
+		}
+
+
+	}
+	//display
+	display_command = PRINT_MINUTE_SET;
+	printf("분");
 }
 
 void year_set()
 {
-	btn=' ';
-	st_info = YEAR_SET;
-	//깜빡깜빡
-	printf("년 바꾸는 중");
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = 0;
+		}
+		if (btn == 'b') {
+			if (current_tm.tm_year == 199) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c') {
+			st_info = MONTH_SET;
+		}
+	}
+	//display
+	display_command = PRINT_YEAR_SET;
+	printf("연");
 }
 
 void month_set()
 {
-	btn=' ';
-	st_info = MONTH_SET;
-	//깜빡깜빡
-	printf("달 바꾸는 중");
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = 0;
+		}
+		if (btn == 'b') {
+			if (current_tm.tm_mon == 12) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c') {
+			st_info = DAY_SET;
+		}
+	}
+	//display
+	display_command = PRINT_MONTH_SET;
+	printf("달");
 }
 
 void day_set()
 {
-	btn=' ';
-	st_info = DAY_SET;
-	//깜빡깜빡
-	printf("일 바꾸는 중");
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = 0;
+		}
+		if (btn == 'b') {
+			//int date = date(current_tm.tm_year, current_tm.tm_mon);
+			int date = 28;
+			if (current_tm.tm_mday == date) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c') {
+			st_info = SEC_SET;
+		}
+	}
+	//display
+	display_command = PRINT_DAY_SET;
+	printf("일");
 }
 
-void plus_one(int st_info);
-void set_min(int st_info);
+	void plus_one(int st_info)
+	{
+		switch (st_info)
+		{
+		case SEC_SET: current_tm.tm_sec++; break;
+		case HOUR_SET: current_tm.tm_hour++; break;
+		case MINUTE_SET: current_tm.tm_min++; break;
+		case YEAR_SET: current_tm.tm_year++; break;
+		case MONTH_SET: current_tm.tm_mon++; break;
+		case DAY_SET: current_tm.tm_mday++; break;
+		default: break;
+		}
+	}
 
-void alarm_mode()
-{
-	btn=' ';
-	mo_info = ALARM_MODE;
-}
-void alarm_indicator()
-{
-	btn=' ';
-	printf("indicator");
-}
-void lap_time();
-void stop();
-void start();
-void stopwatch_mode();
+	void set_min(int st_info)
+	{
+		switch (st_info)
+		{
+		case SEC_SET:
+			current_tm.tm_sec = 0;
+			current_tm.tm_min--;
+			break;
+		case HOUR_SET:
+			current_tm.tm_hour = 0;
+			current_tm.tm_mday--;
+			break;
+		case MINUTE_SET:
+			current_tm.tm_min = 0;
+			current_tm.tm_hour--;
+			break;
+		case YEAR_SET:
+			current_tm.tm_year = 119;
+			break;
+		case MONTH_SET:
+			current_tm.tm_mon = 1;
+			current_tm.tm_year--;
+			break;
+		case DAY_SET:
+			current_tm.tm_mday = 1;
+			current_tm.tm_mon--;
+			break;
+		default: break;
+		}
+	}
 
-void turn_on();
-void turn_off();
+	void alarm_mode()
+	{
+		//button input
+		if (kbhit() == 1) {
+			if (btn == 'a') {
+				st_info = HOUR_SET;
+			}
+			if (btn == 'b') {
+				if (current_tm.tm_hour == 23) set_min(st_info);
+				else plus_one(st_info);
+			}
+			if (btn == 'c') {
+				st_info = MINUTE_SET;
+			}
+		}
+		//display
+		display_command = PRINT_MINUTE_SET;
 
-void turn_yellow();
+	}
+	void alarm_indicator()
+	{
+		//alarm_mode일때 indicator를 띄운다.
+		printf("indicator");
+	}
+	void lap_time();
+	void stop();
+	void start();
+	void stopwatch_mode();
 
-void btn_input();
+	void turn_on();
+	void turn_off();
+
+	void turn_yellow();
+
+	void btn_input();
 
 int getch()
 {
 	int c;
-    	struct termios oldattr, newattr;
+	struct termios oldattr, newattr;
 
-    	tcgetattr(STDIN_FILENO, &oldattr);           // 현재 터미널 설정 읽음
-   	newattr = oldattr;
-   	newattr.c_lflag &= ~(ICANON | ECHO);         // CANONICAL과 ECHO 끔
-    	newattr.c_cc[VMIN] = 1;                      // 최소 입력 문자 수를 1로 설정
-    	newattr.c_cc[VTIME] = 0;                     // 최소 읽기 대기 시간을 0으로 설정
-    	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);  // 터미널에 설정 입력
-    	c = getchar();                               // 키보드 입력 읽음
-    	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // 원래의 설정으로 복구
-    	return c;
+	tcgetattr(STDIN_FILENO, &oldattr);           // 현재 터미널 설정 읽음
+	newattr = oldattr;
+	newattr.c_lflag &= ~(ICANON | ECHO);         // CANONICAL과 ECHO 끔
+	newattr.c_cc[VMIN] = 1;                      // 최소 입력 문자 수를 1로 설정
+	newattr.c_cc[VTIME] = 0;                     // 최소 읽기 대기 시간을 0으로 설정
+	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);  // 터미널에 설정 입력
+	c = getchar();                               // 키보드 입력 읽음
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // 원래의 설정으로 복구
+	return c;
 }
 
-int kbhit(void)
+int kbhit()
 {
-    	struct termios oldt, newt;
-    	int ch;
-    	int oldf;
- 	
- 	tcgetattr(STDIN_FILENO, &oldt);
-    	newt = oldt;
-    	newt.c_lflag &= ~(ICANON | ECHO);
-    	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-    	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
- 
-    	ch = getchar();
- 
-    	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    	fcntl(STDIN_FILENO, F_SETFL, oldf);
- 
-    	if(ch != EOF)
-    	{
-    		ungetc(ch, stdin);
-    		return 1;
-    	}
- 
-    	return 0;
+	struct termios oldt, newt;
+	int oldf;
+
+	tcgetattr(STDIN_FILENO, &oldt);
+	newt = oldt;
+	newt.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+	btn = getch();
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+	if (btn != EOF)
+	{
+		ungetc(btn, stdin);
+		return 1;
+	}
+	
+	return 0;
+}
+
+void display(int display_command)
+{
+
 }
