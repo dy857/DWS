@@ -5,7 +5,8 @@ int mo_info = TIME_MODE;
 int display_command = 0;
 
 
-void current() {
+void current() 
+{
 	current_time = time(NULL);
 	current_tm = *localtime(&current_time);
 	system("clear");
@@ -28,7 +29,8 @@ int date(int year, int month)
 void time_mode()
 {
 	
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = SEC_SET;
 		}
@@ -43,7 +45,8 @@ void time_mode()
 void sec_set()
 {
 	//button input
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = 0;
 		}
@@ -64,7 +67,8 @@ void sec_set()
 void hour_set()
 {
 	//button input
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = 0;
 		}
@@ -84,7 +88,8 @@ void hour_set()
 void minute_set()
 {
 	//button input
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = 0;
 		}
@@ -98,8 +103,6 @@ void minute_set()
 		if (btn == 'c' && mo_info == ALARM_MODE) {
 			st_info = HOUR_SET;
 		}
-
-
 	}
 	//display
 	display_command = PRINT_MINUTE_SET;
@@ -109,7 +112,8 @@ void minute_set()
 void year_set()
 {
 	//button input
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = 0;
 		}
@@ -129,7 +133,8 @@ void year_set()
 void month_set()
 {
 	//button input
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = 0;
 		}
@@ -149,7 +154,8 @@ void month_set()
 void day_set()
 {
 	//button input
-	if (kbhit() == 1) {
+	if (kbhit() == 1) 
+	{
 		if (btn == 'a') {
 			st_info = 0;
 		}
@@ -168,24 +174,25 @@ void day_set()
 	printf("일\n");
 }
 
-	void plus_one(int st_info)
+	
+void plus_one(int st_info)
+{
+	switch (st_info)
 	{
-		switch (st_info)
-		{
-		case SEC_SET: current_tm.tm_sec++; break;
-		case HOUR_SET: current_tm.tm_hour++; break;
-		case MINUTE_SET: current_tm.tm_min++; break;
-		case YEAR_SET: current_tm.tm_year++; break;
-		case MONTH_SET: current_tm.tm_mon++; break;
-		case DAY_SET: current_tm.tm_mday++; break;
-		default: break;
-		}
+	case SEC_SET: current_tm.tm_sec++; break;
+	case HOUR_SET: current_tm.tm_hour++; break;
+	case MINUTE_SET: current_tm.tm_min++; break;
+	case YEAR_SET: current_tm.tm_year++; break;
+	case MONTH_SET: current_tm.tm_mon++; break;
+	case DAY_SET: current_tm.tm_mday++; break;
+	default: break;
 	}
+}
 
-	void set_min(int st_info)
+void set_min(int st_info)
+{
+	switch (st_info)
 	{
-		switch (st_info)
-		{
 		case SEC_SET:
 			current_tm.tm_sec = 0;
 			current_tm.tm_min--;
@@ -210,44 +217,46 @@ void day_set()
 			current_tm.tm_mon--;
 			break;
 		default: break;
+	}
+}
+
+void alarm_mode()
+{
+	//button input
+	if (kbhit() == 1) {
+		if (btn == 'a') {
+			st_info = HOUR_SET;
+		}
+		if (btn == 'b') {
+			if (current_tm.tm_hour == 23) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'c') {
+			st_info = MINUTE_SET;
 		}
 	}
-
-	void alarm_mode()
-	{
-		//button input
-		if (kbhit() == 1) {
-			if (btn == 'a') {
-				st_info = HOUR_SET;
-			}
-			if (btn == 'b') {
-				if (current_tm.tm_hour == 23) set_min(st_info);
-				else plus_one(st_info);
-			}
-			if (btn == 'c') {
-				st_info = MINUTE_SET;
-			}
-		}
 		//display
 		display_command = PRINT_MINUTE_SET;
 		printf("알람모드\n");
-	}
-	void alarm_indicator()
-	{
-		//alarm_mode일때 indicator를 띄운다.
-		printf("indicator");
-	}
-	void lap_time();
-	void stop();
-	void start();
-	void stopwatch_mode();
+}
 
-	void turn_on();
-	void turn_off();
+void alarm_indicator()
+{
+	//alarm_mode일때 indicator를 띄운다.
+	printf("indicator");
+}
 
-	void turn_yellow();
+void lap_time();
+void stop();
+void start();
+void stopwatch_mode();
 
-	void btn_input();
+void turn_on();
+void turn_off();
+
+void turn_yellow();
+
+void btn_input();
 
 int getch()
 {
