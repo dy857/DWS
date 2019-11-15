@@ -23,6 +23,8 @@
 #define START 10
 #define STOP 11
 #define LAP_TIME 12
+#define TURN_ON 13
+#define TURN_OFF 14
 
 //display command
 #define PRINT_TIME_MODE 20
@@ -32,24 +34,39 @@
 #define PRINT_YEAR_SET 24
 #define PRINT_MONTH_SET 25
 #define PRINT_DAY_SET 26
+#define PRINT_ALARM_MODE 27
+#define PRINT_STOPWATCH_MODE 28
+#define PRINT_START 29
+#define PRINT_STOP 30
+#define PRINT_LAP_TIME 31
 
 
-typedef struct alarm_information{
+
+typedef struct _alarm_information{
    bool alarm_power; // 알람 켜짐 여부
    bool info;   // 알람여부
    int hour;
    int min;
-}alarm_info;
+}alarm_information;
 
 int st_info;
 int mo_info;
 int display_command;
 int btn;
 time_t current_time;
-struct tm current_tm;
-
+struct tm *current_tm;
 
 int date(int year, int month);
+
+// 스톱워치 변수
+unsigned int stop_min;
+unsigned int stop_sec;
+unsigned int stop_milisec;
+clock_t start_time;
+clock_t stop_time;
+// backlight flag
+bool bl_flag;
+
 void current();
 void time_mode();
 void sec_set();
