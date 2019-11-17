@@ -366,25 +366,29 @@ void stop()
 
 void turn_off()
 {
-	if(alarm_info.hour == current_tm->tm_hour && alarm_info.min == current_tm->tm_min ){
-		st_info=TURN_ON;
-	}
-		//display
-		
+	if(st_info == TURN_OFF){alarm_info.alarm_power=false;}
+	else{turn_on();}		
 }
 
 void turn_on()
 {	
 	//+5s shut down alarm
-	
+	int delay = current_tm->tm_min;
 	//button input
-	if (kbhit() == 1) {
+	if(kbhit() == 1) {
 		if (btn == 'a' || btn == 'b' || btn == 'c' || btn == 'd' ) {
-			st_info=TURN_OFF;
+			alarm_info.hour=12;
+			alarm_info.min=0;
+			st_info = TURN_OFF;
+
 		}
 	}
 		//display
-		
+	if(delay+5 == current_tm->tm_min){
+
+		printf("\a");
+	}
+	
 }
 
 void turn_yellow() {

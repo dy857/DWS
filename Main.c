@@ -8,7 +8,7 @@ void main() {
 	alarm_information alarm_info;
 	alarm_info.alarm_power = false;
 	alarm_info.info = false;
-	alarm_info.hour=0;
+	alarm_info.hour=12;
 	alarm_info.min=0;
 
 	// stopwatch
@@ -26,6 +26,8 @@ void main() {
 		current();
 		// Beep Controller
 		if (alarm_info.alarm_power == true && alarm_info.hour == current_tm->tm_hour && alarm_info.min == current_tm->tm_min) {
+			turn_off();
+		
 		}
 		else {
 
