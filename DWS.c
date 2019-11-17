@@ -1,38 +1,14 @@
 #include "DWS.h"
 
 int st_info = 0;
+int al_info = TURN_OFF;
 int mo_info = TIME_MODE;
+int bl_info = 0;
+
 alarm_information alarm_info;
+
 int display_command = 0;
 char* week_day[]={"SU", "MO", "TU", "WE", "TH", "FR", "SA"};
-void current() 
-{
-	current_tm->tm_sec++;
-	if(current_tm->tm_sec==60){
-		current_tm->tm_sec=0;
-		current_tm->tm_min++;
-	}else if(current_tm->tm_min==60){
-		current_tm->tm_min=0;
-		current_tm->tm_hour++;
-	}else if(current_tm->tm_hour==24){
-		current_tm->tm_hour=0;
-		if(current_tm->tm_wday==6){
-			current_tm->tm_wday=0;
-		}else{
-			current_tm->tm_mday++;
-			current_tm->tm_wday++;
-		}
-	// 달마다 조작 필요
-	}else if(current_tm->tm_mday==30){
-		current_tm->tm_mday=0;
-		current_tm->tm_mon++;
-	}else if(current_tm->tm_mon==12){
-		current_tm->tm_mon=1;
-		current_tm->tm_year++;
-	}else if(current_tm->tm_year==2099){
-		current_tm->tm_year=2019;
-	}
-}
 
 int date(int year, int month)
 {
@@ -47,9 +23,42 @@ int date(int year, int month)
 	return day;
 }
 
+void current() 
+{
+	current_tm.tm_sec++;
+	if(current_tm.tm_sec==60){
+		current_tm.tm_sec=0;
+		current_tm.tm_min++;
+	}
+	else if(current_tm.tm_min==60){
+		current_tm.tm_min=0;
+		current_tm.tm_hour++;
+	}
+	else if(current_tm.tm_hour==24){
+		current_tm.tm_hour=0;
+		if(current_tm.tm_wday==6){
+			current_tm.tm_wday=0;
+		}else{
+			current_tm.tm_mday++;
+			current_tm.tm_wday++;
+		}
+	}
+	else if(current_tm.tm_mday==date(current_tm.tm_year, current_tm.tm_mon)){
+		current_tm.tm_mday=0;
+		current_tm.tm_mon++;
+	}
+	else if(current_tm.tm_mon==12){
+		current_tm.tm_mon=1;
+		current_tm.tm_year++;
+	}
+	else if(current_tm.tm_year==2099){
+		current_tm.tm_year=2019;
+	}
+}
+
 void time_mode()
 {
-	
+	//button input
 	if (kbhit() == 1) 
 	{
 		if (btn == 'a') {
@@ -71,7 +80,7 @@ void sec_set()
 			st_info = 0;
 		}
 		if (btn == 'b') {
-			if (current_tm->tm_sec == 59) set_min(st_info);
+			if (current_tm.tm_sec == 59) set_min(st_info);
 			else plus_one(st_info);
 		}
 		if (btn == 'c') {
@@ -89,24 +98,32 @@ void hour_set()
 	//button input
 	if (kbhit() == 1) 
 	{
-		if (btn == 'a') {
+		//TIME_MODE
+		if (btn == 'a' && mo_info == TIME_MODE) {
 			st_info = 0;
 		}
 		if (btn == 'b' && mo_info == TIME_MODE) {
-			if (current_tm->tm_hour == 23) set_min(st_info);
+			if (current_tm.tm_hour == 23) set_min(st_info);
 			else plus_one(st_info);
 		}
-		if (btn == 'b' && mo_info == ALARM_MODE){
-                        if (alarm_info.hour == 23) set_min(st_info);
-                        else plus_one(st_info);
-                }
-
 		if (btn == 'c' && mo_info == TIME_MODE) {
 			st_info = MINUTE_SET;
 		}
-		if (btn == 'c' && mo_info == ALARM_MODE) {
-                        st_info = AL_MINUTE_SET;
+
+		//ALARM_MODE
+		if (btn == 'a' && mo_info == ALARM_MODE) {
+                     		st_info = 0;
+			alarm_info.alarm_power = true;
+			alarm_info.display_alarm_indicator = 'I';
+               	}
+		if (btn == 'b' && mo_info == ALARM_MODE){
+                    		if (alarm_tm.tm_hour == 23) set_min(st_info);
+                        		else plus_one(st_info);
                 }
+		if (btn == 'c' && mo_info == ALARM_MODE) {
+              			st_info = AL_MINUTE_SET;
+                }
+
 	}
 	//display
 	if(mo_info==TIME_MODE) {display_command = PRINT_HOUR_SET;}
@@ -119,31 +136,37 @@ void minute_set()
 	//button input
 	if (kbhit() == 1) 
 	{
+		//TIME_MODE
 		if (btn == 'a' && mo_info == TIME_MODE) {
 			st_info = 0;
 		}
-		if (btn == 'a' && mo_info == ALARM_MODE) {
-                        st_info = 0;
-			alarm_indicator();
-                }
+		
 		if (btn == 'b' && mo_info == TIME_MODE) {
-			if (current_tm->tm_min == 59) set_min(st_info);
-			else plus_one(st_info);
-		}
-		if (btn == 'b' && mo_info == ALARM_MODE){
-			if (alarm_info.hour == 59) set_min(st_info);
+			if (current_tm.tm_min == 59) set_min(st_info);
 			else plus_one(st_info);
 		}
 		if (btn == 'c' && mo_info == TIME_MODE) {
 			st_info = YEAR_SET;
 		}
+
+		//ALARM_MODE
+		if (btn == 'a' && mo_info == ALARM_MODE) {
+                        		st_info = 0;
+			alarm_info.alarm_power = true;
+			alarm_info.display_alarm_indicator = 'I';
+               	 }
+		if (btn == 'b' && mo_info == ALARM_MODE){
+			if (alarm_tm.tm_hour == 59) set_min(st_info);
+			else plus_one(st_info);
+		}
 		if (btn == 'c' && mo_info == ALARM_MODE) {
 			st_info = AL_HOUR_SET;
 		}
+
 	}
 	//display
 	if(mo_info==TIME_MODE) {display_command = PRINT_MINUTE_SET;}
-        if(mo_info==ALARM_MODE) {display_command = PRINT_AL_MINUTE_SET;}
+        	if(mo_info==ALARM_MODE) {display_command = PRINT_AL_MINUTE_SET;}
 	printf("분\n");
 }
 
@@ -156,7 +179,7 @@ void year_set()
 			st_info = 0;
 		}
 		if (btn == 'b') {
-			if (current_tm->tm_year == 199) set_min(st_info);
+			if (current_tm.tm_year == 199) set_min(st_info);
 			else plus_one(st_info);
 		}
 		if (btn == 'c') {
@@ -177,7 +200,7 @@ void month_set()
 			st_info = 0;
 		}
 		if (btn == 'b') {
-			if (current_tm->tm_mon == 12) set_min(st_info);
+			if (current_tm.tm_mon == 12) set_min(st_info);
 			else plus_one(st_info);
 		}
 		if (btn == 'c') {
@@ -198,9 +221,8 @@ void day_set()
 			st_info = 0;
 		}
 		if (btn == 'b') {
-			//int date = date(current_tm->tm_year, current_tm->tm_mon);
-			int date = 28;
-			if (current_tm->tm_mday == date) set_min(st_info);
+			//달 별로 일 수가 다르기 때문에 date함수를 구현해 맞는 max_day를 넣어주었습니다.
+			if (current_tm.tm_mday == date(current_tm.tm_year, current_tm.tm_mon)) set_min(st_info);
 			else plus_one(st_info);
 		}
 		if (btn == 'c') {
@@ -212,54 +234,60 @@ void day_set()
 	printf("일\n");
 }
 
-// 일 플러스 하는 부분에서 요일도 하나씩 올렸습니다. 
 void plus_one(int st_info)
 {
 	switch (st_info)
 	{
-	case SEC_SET: current_tm->tm_sec++; break;
-	case HOUR_SET: current_tm->tm_hour++; break;
-	case MINUTE_SET: current_tm->tm_min++; break;
-	case YEAR_SET: current_tm->tm_year++; break;
-	case MONTH_SET: current_tm->tm_mon++; break;
-	case DAY_SET:
-		current_tm->tm_mday++;
-		if(current_tm->tm_wday==6){ current_tm->tm_wday=0;}
-		else{ current_tm->tm_wday++;}		
-		break;
-	case AL_HOUR_SET: alarm_info.hour++; break;
-	case AL_MINUTE_SET: alarm_info.min++; break;
-	default: break;
+		case SEC_SET: 
+			current_tm.tm_sec++; break;
+		case HOUR_SET: 
+			current_tm.tm_hour++; break;
+		case MINUTE_SET: 
+			current_tm.tm_min++; break;
+		case YEAR_SET: 
+			current_tm.tm_year++; break;
+		case MONTH_SET: 
+			current_tm.tm_mon++; break;
+		case DAY_SET:
+			current_tm.tm_mday++;
+			if(current_tm.tm_wday==6) current_tm.tm_wday=0;
+			else current_tm.tm_wday++;		
+			break;
+		case AL_HOUR_SET: 
+			alarm_tm.tm_hour++; break;
+		case AL_MINUTE_SET: 
+			alarm_tm.tm_min++; break;
+		default: break;
 	}
 }
-// 더해져도 위의 단위가 커져지 않아서 --하는 부분 뺐습니다.
+
 void set_min(int st_info)
 {
 	switch (st_info)
 	{
 		case SEC_SET:
-			current_tm->tm_sec = 0;
+			current_tm.tm_sec = 0;
 			break;
 		case HOUR_SET:
-			current_tm->tm_hour = 0;
+			current_tm.tm_hour = 0;
 			break;
 		case MINUTE_SET:
-			current_tm->tm_min = 0;
+			current_tm.tm_min = 0;
 			break;
 		case YEAR_SET:
-			current_tm->tm_year = 2019;
+			current_tm.tm_year = 2019;
 			break;
 		case MONTH_SET:
-			current_tm->tm_mon = 1;
+			current_tm.tm_mon = 1;
 			break;
 		case DAY_SET:
-			current_tm->tm_mday = 1;
+			current_tm.tm_mday = 1;
 			break;
 		case AL_HOUR_SET:
-			alarm_info.hour = 0;
+			alarm_tm.tm_hour = 0;
 			break;
 		case AL_MINUTE_SET:
-			alarm_info.min = 0;
+			alarm_tm.tm_min = 0;
 			break;
 		default: break;
 	}
@@ -286,11 +314,13 @@ void alarm_mode()
 void alarm_indicator()
 {
 	if(alarm_info.alarm_power == true){
-		alarm_info.alarm_power==false;
+		alarm_info.alarm_power=false;
+		alarm_info.display_alarm_indicator = ' ';
 	}else{
-		alarm_info.alarm_power==true;
+		alarm_info.alarm_power=true;
+		alarm_info.display_alarm_indicator = 'I';
 	}
-	printf("indicator state : %d\n", alarm_info.alarm_power);
+	//printf("indicator state : %d\n", alarm_info.alarm_power);
 }
 
 void stopwatch_mode()
@@ -301,13 +331,13 @@ void stopwatch_mode()
 			st_info=START;
 		}
 		if (btn == 'c') {
-                        mo_info = TIME_MODE;
-                }
-
+                       		mo_info = TIME_MODE;
+                	}
 	}
-		//display
-		display_command = PRINT_STOPWATCH_MODE;
-		printf("stopwatch\n");
+	
+	//display
+	display_command = PRINT_STOPWATCH_MODE;
+	printf("stopwatch\n");
 }	
 
 void start()
@@ -320,15 +350,16 @@ void start()
 			st_info=STOP;
 		}
 	}
-		//display
-		display_command = PRINT_START;
-		start_time=clock();
-//		stop_sec=start_time/CLOCKS_PER_SEC;
-//		stop_min=start_time/CLOCKS_PER_SEC %60;
-//		printf("%0.2f,%d",stop_sec, stop_min);
-		stop_sec=start_time/CLOCKS_PER_SEC;
-		stop_milisec=start_time/1000/CLOCKS_PER_SEC;
-		stop_min=stop_sec/60;
+
+	//display
+	display_command = PRINT_START;
+	start_time=clock();
+//	stop_sec=start_time/CLOCKS_PER_SEC;
+//	stop_min=start_time/CLOCKS_PER_SEC %60;
+//	printf("%0.2f,%d",stop_sec, stop_min);
+	stop_sec=start_time/CLOCKS_PER_SEC;
+	stop_milisec=start_time/1000/CLOCKS_PER_SEC;
+	stop_min=stop_sec/60;
 }
 
 void lap_time()
@@ -359,43 +390,69 @@ void stop()
 			st_info=START;
 		}
 	}
-		//display
-		display_command = PRINT_STOP;
+
+	//display
+	display_command = PRINT_STOP;
 }
 
 
 void turn_off()
 {
-	if(st_info == TURN_OFF){alarm_info.alarm_power=false;}
-	else{turn_on();}		
+
+	if((alarm_info.alarm_power == true) && (alarm_tm.tm_hour == current_tm.tm_hour) && (alarm_tm.tm_min == current_tm.tm_min)) al_info = TURN_ON;
+	
+		
 }
 
 void turn_on()
 {	
-	//+5s shut down alarm
-	int delay = current_tm->tm_min;
 	//button input
 	if(kbhit() == 1) {
 		if (btn == 'a' || btn == 'b' || btn == 'c' || btn == 'd' ) {
-			alarm_info.hour=12;
-			alarm_info.min=0;
-			st_info = TURN_OFF;
-
+			alarm_tm = *localtime(&current_time);
+			alarm_info.beep_time=0;
+			alarm_info.alarm_power=false;
+			alarm_info.display_alarm_indicator = ' ';
+			al_info = TURN_OFF;
 		}
 	}
-		//display
-	if(delay+5 == current_tm->tm_min){
 
+	//display
+	if(alarm_info.beep_time<5){
+		alarm_info.beep_time++;
 		printf("\a");
+		sleep(1);
+	}
+
+	if(alarm_info.beep_time==5) {
+		alarm_tm = *localtime(&current_time);
+		alarm_info.beep_time=0;
+		alarm_info.alarm_power=false;
+		alarm_info.display_alarm_indicator = ' ';
+		al_info = TURN_OFF;
 	}
 	
 }
 
+void idle() {
+	if (kbhit() == 1) {
+		if (btn == 'd') {
+			bl_info=TURN_YELLOW;
+		}
+	}
+}
+
 void turn_yellow() {
-	if(bl_flag==false)
-	printf("%c[1;33m", 27);
-	sleep(2);
-	system("reset");
+
+	if(backlight_time<2) {
+		printf("%c[1;33m", 27);
+		backlight_time++;
+	}
+	else {
+		backlight_time = 0;
+		bl_info=0;
+		printf("%c[0m", 27);
+	}
 }
 
 void btn_input();
@@ -442,72 +499,63 @@ int kbhit()
 
 void display(int display_command)
 {
-	if (alarm_info.alarm_power == true) {
-		printf("al ");
-	}
-	else
-	{
-		if (display_command == PRINT_TIME_MODE ){
-			system("clear");
-			printf("%s %d-%d-%d %d:%d:%d\n", week_day[current_tm->tm_wday], current_tm->tm_year+1900, current_tm->tm_mon+1, current_tm->tm_mday, current_tm->tm_hour, current_tm->tm_min, current_tm->tm_sec);
-		}
-		if (display_command == PRINT_SEC_SET) { 
-			system("clear");
-			printf("%s %d-%d-%d %d:%d:%c[4m%d%c[0m\n", week_day[current_tm->tm_wday], current_tm->tm_year + 1900, current_tm->tm_mon + 1, current_tm->tm_mday, current_tm->tm_hour, current_tm->tm_min, 27, current_tm->tm_sec, 27);
-		}
-		if (display_command == PRINT_HOUR_SET) { 
-			system("clear");
-			printf("%s %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm->tm_wday], current_tm->tm_year + 1900, current_tm->tm_mon + 1, current_tm->tm_mday, 27, current_tm->tm_hour, 27, current_tm->tm_min, current_tm->tm_sec);
-		}
-		if (display_command == PRINT_MINUTE_SET) { 
-			system("clear");
-			printf("%s %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm->tm_wday], current_tm->tm_year + 1900, current_tm->tm_mon + 1, current_tm->tm_mday, current_tm->tm_hour, 27, current_tm->tm_min, 27, current_tm->tm_sec);
-		}
-		if (display_command == PRINT_YEAR_SET) {
-			system("clear");
-			printf("%s %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm->tm_wday], 27, current_tm->tm_year + 1900, 27, current_tm->tm_mon + 1, current_tm->tm_mday, current_tm->tm_hour, current_tm->tm_min, current_tm->tm_sec);
-		}
-		if (display_command == PRINT_MONTH_SET) {
-			system("clear");
-			printf("%s %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm->tm_wday], current_tm->tm_year + 1900, 27, current_tm->tm_mon + 1, 27, current_tm->tm_mday, current_tm->tm_hour, current_tm->tm_min, current_tm->tm_sec);
-		}
-		if (display_command == PRINT_DAY_SET) {
-			system("clear");
-			printf("%s %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm->tm_wday], current_tm->tm_year + 1900, current_tm->tm_mon + 1, 27, current_tm->tm_mday, 27, current_tm->tm_hour, current_tm->tm_min, current_tm->tm_sec);
-		}
-
-		if (display_command == PRINT_ALARM_MODE){
-			system("clear");
-			printf("AL %d-%d %d:%d\n", current_tm->tm_mon + 1, current_tm->tm_mday, alarm_info.hour, alarm_info.min);
-		}	
-
-		if(display_command == PRINT_AL_HOUR_SET){
-			system("clear");
-                        printf("AL %d-%d %c[4m%d%c[0m:%d\n", current_tm->tm_mon + 1, current_tm->tm_mday,27, alarm_info.hour,27, alarm_info.min);
-		}
-
-		if(display_command == PRINT_AL_MINUTE_SET){
-                        system("clear");
-                        printf("AL %d-%d %d:%c[4m%d%c[0m\n", current_tm->tm_mon + 1, current_tm->tm_mday, alarm_info.hour,27, alarm_info.min,27);
-                }
-			
-	if (display_command == PRINT_STOPWATCH_MODE){
-			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm->tm_hour, current_tm->tm_min, stop_min, stop_sec, stop_milisec);
-		}
-		if (display_command == PRINT_START){
-			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm->tm_hour, current_tm->tm_min, stop_min, stop_sec, stop_milisec);
-		}
-		if (display_command == PRINT_STOP){
-			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm->tm_hour, current_tm->tm_min, stop_min, stop_sec, stop_milisec);
-		}
-		if (display_command == PRINT_LAP_TIME){
-			system("clear");
-			
-		}
 	
-}
-
+	switch(display_command) {
+		case PRINT_TIME_MODE:
+			system("clear");
+			printf("%s %c %d-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			break;
+		case PRINT_SEC_SET:
+			system("clear");
+			printf("%s %c %d-%d-%d %d:%d:%c[4m%d%c[0m\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, 27, current_tm.tm_sec, 27);
+			break;
+		case PRINT_HOUR_SET:
+			system("clear");
+			printf("%s %c %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27, current_tm.tm_min, current_tm.tm_sec);
+			break;
+		case PRINT_MINUTE_SET:
+			system("clear");
+			printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27, current_tm.tm_sec);
+			break;
+		case PRINT_YEAR_SET:
+			system("clear");
+			printf("%s %c %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			break;
+		case PRINT_MONTH_SET:
+			system("clear");
+			printf("%s %c %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			break;
+		case PRINT_DAY_SET:
+			system("clear");
+			printf("%s %c %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			break;
+		case PRINT_ALARM_MODE:
+			system("clear");
+			printf("AL %c %d-%d %d:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, alarm_tm.tm_min);
+			break;
+		case PRINT_AL_HOUR_SET:
+			system("clear");
+			printf("AL %c %d-%d %c[4m%d%c[0m:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27, alarm_tm.tm_min);
+			break;
+		case PRINT_AL_MINUTE_SET:
+			system("clear");
+			printf("AL %c %d-%d %d:%c[4m%d%c[0m\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, 27, alarm_tm.tm_min, 27);
+			break;
+		case PRINT_STOPWATCH_MODE:
+			system("clear");
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			break;
+		case PRINT_START:
+			system("clear");
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			break;
+		case PRINT_STOP:
+			system("clear");
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			break;
+		case PRINT_LAP_TIME:
+			system("clear");
+			break;
+		default: break;
+	}
 }

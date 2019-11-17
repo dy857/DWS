@@ -27,6 +27,7 @@
 #define LAP_TIME 14
 #define TURN_ON 15
 #define TURN_OFF 16
+#define TURN_YELLOW 17
 
 //display command
 #define PRINT_TIME_MODE 20
@@ -48,19 +49,21 @@
 
 typedef struct _alarm_information{
    bool alarm_power; // 알람 켜짐 여부
-   bool info;   // 알람여부
-   int hour;
-   int min;
+   char display_alarm_indicator;
+   int beep_time;
 }alarm_information;
 
 int st_info;
+int al_info;
 int mo_info;
+int bl_info;
+int backlight_time;
 int display_command;
 int btn;
 time_t current_time;
-struct tm *current_tm;
-
-int date(int year, int month);
+time_t alarm_time;
+struct tm current_tm;
+struct tm alarm_tm;
 
 // 스톱워치 변수
 unsigned int stop_min;
@@ -68,9 +71,11 @@ unsigned int stop_sec;
 unsigned int stop_milisec;
 clock_t start_time;
 clock_t stop_time;
+
 // backlight flag
 bool bl_flag;
 
+int date(int year, int month);
 void current();
 void time_mode();
 void sec_set();
@@ -89,6 +94,7 @@ void start();
 void stopwatch_mode();
 void turn_on();
 void turn_off();
+void idle();
 void turn_yellow();
 void btn_input();
 int getch();
