@@ -19,12 +19,14 @@
 #define MONTH_SET 6
 #define DAY_SET 7
 #define ALARM_MODE 8
-#define STOPWATCH_MODE 9
-#define START 10
-#define STOP 11
-#define LAP_TIME 12
-#define TURN_ON 13
-#define TURN_OFF 14
+#define AL_HOUR_SET 9
+#define AL_MINUTE_SET 10 
+#define STOPWATCH_MODE 11
+#define START 12
+#define STOP 13
+#define LAP_TIME 14
+#define TURN_ON 15
+#define TURN_OFF 16
 
 //display command
 #define PRINT_TIME_MODE 20
@@ -35,10 +37,12 @@
 #define PRINT_MONTH_SET 25
 #define PRINT_DAY_SET 26
 #define PRINT_ALARM_MODE 27
-#define PRINT_STOPWATCH_MODE 28
-#define PRINT_START 29
-#define PRINT_STOP 30
-#define PRINT_LAP_TIME 31
+#define PRINT_AL_HOUR_SET 28
+#define PRINT_AL_MINUTE_SET 29
+#define PRINT_STOPWATCH_MODE 30
+#define PRINT_START 31
+#define PRINT_STOP 32
+#define PRINT_LAP_TIME 33
 
 
 

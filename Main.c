@@ -46,12 +46,19 @@ void main() {
 			else if (mo_info == ALARM_MODE) {
 
 				if(st_info == 0){alarm_mode();}
-				if (st_info == HOUR_SET) { hour_set(); }
-				if (st_info == MINUTE_SET ) { minute_set(); }
+				if (st_info == AL_HOUR_SET) { hour_set(); }
+				if (st_info == AL_MINUTE_SET ) { minute_set(); }
 				sleep(1);
 
 			}
-			else if (mo_info == STOPWATCH_MODE && btn == 'c') { time_mode(); }
+			else if (mo_info == STOPWATCH_MODE){
+				
+				if(st_info == 0){stopwatch_mode();}
+				if(st_info == START){start();}	
+				if(st_info == LAP_TIME){lap_time();}
+				if(st_info == STOP){stop();}
+				sleep(1);
+			}
 
 		}
 		// Backlight Controller
@@ -60,6 +67,6 @@ void main() {
 		}
 		
 		display(display_command);
-	}
+}
 
 }

@@ -2,8 +2,8 @@
 
 int st_info = 0;
 int mo_info = TIME_MODE;
-int display_command = 0;
 alarm_information alarm_info;
+int display_command = 0;
 char* week_day[]={"SU", "MO", "TU", "WE", "TH", "FR", "SA"};
 void current() 
 {
@@ -92,16 +92,25 @@ void hour_set()
 		if (btn == 'a') {
 			st_info = 0;
 		}
-		if (btn == 'b') {
+		if (btn == 'b' && mo_info == TIME_MODE) {
 			if (current_tm->tm_hour == 23) set_min(st_info);
 			else plus_one(st_info);
 		}
-		if (btn == 'c') {
+		if (btn == 'b' && mo_info == ALARM_MODE){
+                        if (alarm_info.hour == 23) set_min(st_info);
+                        else plus_one(st_info);
+                }
+
+		if (btn == 'c' && mo_info == TIME_MODE) {
 			st_info = MINUTE_SET;
 		}
+		if (btn == 'c' && mo_info == ALARM_MODE) {
+                        st_info = AL_MINUTE_SET;
+                }
 	}
 	//display
-	display_command = PRINT_HOUR_SET;
+	if(mo_info==TIME_MODE) {display_command = PRINT_HOUR_SET;}
+	if(mo_info==ALARM_MODE) {display_command = PRINT_AL_HOUR_SET;}
 	printf("시간\n");
 }
 
@@ -110,22 +119,31 @@ void minute_set()
 	//button input
 	if (kbhit() == 1) 
 	{
-		if (btn == 'a') {
+		if (btn == 'a' && mo_info == TIME_MODE) {
 			st_info = 0;
 		}
-		if (btn == 'b') {
+		if (btn == 'a' && mo_info == ALARM_MODE) {
+                        st_info = 0;
+			alarm_indicator();
+                }
+		if (btn == 'b' && mo_info == TIME_MODE) {
 			if (current_tm->tm_min == 59) set_min(st_info);
+			else plus_one(st_info);
+		}
+		if (btn == 'b' && mo_info == ALARM_MODE){
+			if (alarm_info.hour == 59) set_min(st_info);
 			else plus_one(st_info);
 		}
 		if (btn == 'c' && mo_info == TIME_MODE) {
 			st_info = YEAR_SET;
 		}
 		if (btn == 'c' && mo_info == ALARM_MODE) {
-			st_info = HOUR_SET;
+			st_info = AL_HOUR_SET;
 		}
 	}
 	//display
-	display_command = PRINT_MINUTE_SET;
+	if(mo_info==TIME_MODE) {display_command = PRINT_MINUTE_SET;}
+        if(mo_info==ALARM_MODE) {display_command = PRINT_AL_MINUTE_SET;}
 	printf("분\n");
 }
 
@@ -209,6 +227,8 @@ void plus_one(int st_info)
 		if(current_tm->tm_wday==6){ current_tm->tm_wday=0;}
 		else{ current_tm->tm_wday++;}		
 		break;
+	case AL_HOUR_SET: alarm_info.hour++; break;
+	case AL_MINUTE_SET: alarm_info.min++; break;
 	default: break;
 	}
 }
@@ -235,6 +255,12 @@ void set_min(int st_info)
 		case DAY_SET:
 			current_tm->tm_mday = 1;
 			break;
+		case AL_HOUR_SET:
+			alarm_info.hour = 0;
+			break;
+		case AL_MINUTE_SET:
+			alarm_info.min = 0;
+			break;
 		default: break;
 	}
 }
@@ -244,13 +270,13 @@ void alarm_mode()
 	//button input
 	if (kbhit() == 1) {
 		if (btn == 'a') {
-			st_info = HOUR_SET;
+			st_info =AL_HOUR_SET;
 		}
 		if (btn == 'b') {
 			alarm_indicator();
 		}
 		if (btn == 'c') {
-			st_info = STOPWATCH_MODE;
+			mo_info = STOPWATCH_MODE;
 		}
 	}
 		//display
@@ -272,17 +298,20 @@ void stopwatch_mode()
 	//button input
 	if (kbhit() == 1) {
 		if (btn == 'b') {
-			st_info=STOPWATCH_MODE;
+			st_info=START;
 		}
+		if (btn == 'c') {
+                        mo_info = TIME_MODE;
+                }
+
 	}
 		//display
 		display_command = PRINT_STOPWATCH_MODE;
 		printf("stopwatch\n");
-}
+}	
 
 void start()
 {
-	//button input
 	if (kbhit() == 1) {
 		if (btn == 'a') {
 			st_info=LAP_TIME;
@@ -294,8 +323,11 @@ void start()
 		//display
 		display_command = PRINT_START;
 		start_time=clock();
+//		stop_sec=start_time/CLOCKS_PER_SEC;
+//		stop_min=start_time/CLOCKS_PER_SEC %60;
+//		printf("%0.2f,%d",stop_sec, stop_min);
 		stop_sec=start_time/CLOCKS_PER_SEC;
-		stop_milisec=start_time/10;
+		stop_milisec=start_time/1000/CLOCKS_PER_SEC;
 		stop_min=stop_sec/60;
 }
 
@@ -321,7 +353,7 @@ void stop()
 	//button input
 	if (kbhit() == 1) {
 		if (btn == 'a') {
-			st_info=STOPWATCH_MODE;
+			st_info=0;
 		}
 		if (btn == 'b') {
 			st_info=START;
@@ -444,7 +476,18 @@ void display(int display_command)
 			system("clear");
 			printf("AL %d-%d %d:%d\n", current_tm->tm_mon + 1, current_tm->tm_mday, alarm_info.hour, alarm_info.min);
 		}	
-		if (display_command == PRINT_STOPWATCH_MODE){
+
+		if(display_command == PRINT_AL_HOUR_SET){
+			system("clear");
+                        printf("AL %d-%d %c[4m%d%c[0m:%d\n", current_tm->tm_mon + 1, current_tm->tm_mday,27, alarm_info.hour,27, alarm_info.min);
+		}
+
+		if(display_command == PRINT_AL_MINUTE_SET){
+                        system("clear");
+                        printf("AL %d-%d %d:%c[4m%d%c[0m\n", current_tm->tm_mon + 1, current_tm->tm_mday, alarm_info.hour,27, alarm_info.min,27);
+                }
+			
+	if (display_command == PRINT_STOPWATCH_MODE){
 			system("clear");
 			printf("ST %d-%d %d:%d:%d\n", current_tm->tm_hour, current_tm->tm_min, stop_min, stop_sec, stop_milisec);
 		}
