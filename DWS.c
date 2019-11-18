@@ -425,7 +425,6 @@ void turn_on()
 	if(alarm_info.beep_time<5){
 		alarm_info.beep_time++;
 		printf("\a");
-		sleep(1);
 	}
 
 	if(alarm_info.beep_time==5) {
@@ -568,7 +567,7 @@ void display(int display_command)
 		case PRINT_STOPWATCH_MODE:
 			current();
 			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec%60, stop_milisec%100);
 			sleep(1);
 			break;
 		case PRINT_START:
