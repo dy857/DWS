@@ -6,6 +6,7 @@ int mo_info = TIME_MODE;
 int bl_info = 0;
 
 alarm_information alarm_info;
+unsigned int current_sec = 0;
 
 int display_command = 0;
 char* week_day[]={"SU", "MO", "TU", "WE", "TH", "FR", "SA"};
@@ -352,14 +353,17 @@ void start()
 	}
 
 	//display
-	display_command = PRINT_START;
 	start_time=clock();
-//	stop_sec=start_time/CLOCKS_PER_SEC;
-//	stop_min=start_time/CLOCKS_PER_SEC %60;
-//	printf("%0.2f,%d",stop_sec, stop_min);
 	stop_sec=start_time/CLOCKS_PER_SEC;
-	stop_milisec=start_time/1000/CLOCKS_PER_SEC;
+	stop_milisec=start_time/10;
 	stop_min=stop_sec/60;
+
+	if(stop_sec-1==current_sec) {
+		current_sec++;
+		printf("a\n"); current();
+	}
+	
+	display_command = PRINT_START;
 }
 
 void lap_time()
@@ -502,59 +506,84 @@ void display(int display_command)
 	
 	switch(display_command) {
 		case PRINT_TIME_MODE:
+			current();
 			system("clear");
 			printf("%s %c %d-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_SEC_SET:
+			current();
 			system("clear");
 			printf("%s %c %d-%d-%d %d:%d:%c[4m%d%c[0m\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, 27, current_tm.tm_sec, 27);
+			sleep(1);
 			break;
 		case PRINT_HOUR_SET:
+			current();
 			system("clear");
 			printf("%s %c %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_MINUTE_SET:
+			current();
 			system("clear");
 			printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_YEAR_SET:
+			current();
 			system("clear");
 			printf("%s %c %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_MONTH_SET:
+			current();
 			system("clear");
 			printf("%s %c %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_DAY_SET:
+			current();
 			system("clear");
 			printf("%s %c %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_ALARM_MODE:
+			current();
 			system("clear");
 			printf("AL %c %d-%d %d:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, alarm_tm.tm_min);
+			sleep(1);
 			break;
 		case PRINT_AL_HOUR_SET:
+			current();
 			system("clear");
 			printf("AL %c %d-%d %c[4m%d%c[0m:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27, alarm_tm.tm_min);
+			sleep(1);
 			break;
 		case PRINT_AL_MINUTE_SET:
+			current();
 			system("clear");
 			printf("AL %c %d-%d %d:%c[4m%d%c[0m\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, 27, alarm_tm.tm_min, 27);
+			sleep(1);
 			break;
 		case PRINT_STOPWATCH_MODE:
+			current();
 			system("clear");
 			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			sleep(1);
 			break;
 		case PRINT_START:
 			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec%60, stop_milisec%100);
 			break;
 		case PRINT_STOP:
+			current();
 			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec%60, stop_milisec%100);
+			sleep(1);
 			break;
 		case PRINT_LAP_TIME:
 			system("clear");
+			sleep(0.1);
 			break;
 		default: break;
 	}
