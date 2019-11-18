@@ -69,7 +69,6 @@ struct tm alarm_tm;
 unsigned int stop_min;
 unsigned int stop_sec;
 unsigned int stop_milisec;
-unsigned int current_sec;
 clock_t start_time;
 clock_t stop_time;
 
