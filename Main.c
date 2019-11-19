@@ -21,20 +21,26 @@ void main() {
 	// 초기 시간 설정 바꾸기
 	current_time = 1546268400;
 	current_tm = *localtime(&current_time);
+	
+	int i =0;
 
-
-	while (1) {
+	while (1) {	
+		i++;
+			
 		current();
+
+		if(kbhit()==1){
+			
+		}
 
 		// Beep Controller
 		if (al_info == TURN_OFF) turn_off(); 
-		if (al_info == TURN_ON) turn_on(); 
-			
+		if (al_info == TURN_ON) turn_on();
 
 		// Main Controller
-		if (mo_info == TIME_MODE) {
-			
-			if (st_info == 0 ) time_mode();
+		if(mo_info==TIME_MODE)
+		{
+			if (st_info == 0) time_mode();
 			if (st_info == SEC_SET) sec_set();
 			if (st_info == HOUR_SET) hour_set();
 			if (st_info == MINUTE_SET) minute_set();
@@ -58,12 +64,15 @@ void main() {
 			if(st_info == STOP) stop();
 			
 		}
-		sleep(1);
 		// Backlight Controller
 		if (bl_info == 0) idle(); 
 		if (bl_info == TURN_YELLOW) turn_yellow();
 		
-		display(display_command);
+		display(display_command);	
+		sleep(1);
+	printf("%d\n",i);
 	}
+
+    
 
 }
