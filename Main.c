@@ -1,8 +1,16 @@
 #include "DWS.h"
 
 void main() {
+	
+	// Data Storage 및 변수 초기화
+	st_info = 0;
+	al_info = TURN_OFF;
+	mo_info = TIME_MODE;
+	bl_info = 0;
 
-	//alarm information
+	display_command = 0;
+
+	// Alarm information 관련 변수
 	alarm_information alarm_info;
 	alarm_info.alarm_power = false;
 	alarm_info.display_alarm_indicator = ' ';
@@ -10,24 +18,24 @@ void main() {
 	alarm_time = 1546268400;
 	alarm_tm = *localtime(&alarm_time);
 
-	// stopwatch
+	// Stopwatch 관련 변수
 	stop_min=0;
 	stop_sec=0;
 	stop_milisec=0;
-	
-	// backlight
+
+	// Backlight 관련 변수
 	backlight_time = 0;
 
 	// 초기 시간 설정 바꾸기
 	current_time = 1546268400;
 	current_tm = *localtime(&current_time);
 	
-	int i =0;
+	timer_t timerID;
+	createCurrent(&timerID,1,0);
 
-	while (1) {	
-		i++;
+
+	while (1) {
 			
-		current();
 
 		if(kbhit()==1){
 			
@@ -65,12 +73,11 @@ void main() {
 			
 		}
 		// Backlight Controller
-		if (bl_info == 0) idle(); 
+		
 		if (bl_info == TURN_YELLOW) turn_yellow();
 		
 		display(display_command);	
-		sleep(1);
-	printf("%d\n",i);
+		
 	}
 
     

@@ -1,15 +1,12 @@
 #include "DWS.h"
 
-int st_info = 0;
-int al_info = TURN_OFF;
-int mo_info = TIME_MODE;
-int bl_info = 0;
 
 alarm_information alarm_info;
-
-int display_command = 0;
 char* week_day[]={"SU", "MO", "TU", "WE", "TH", "FR", "SA"};
 
+
+
+// 월마다 날짜를 구하는 함수
 int date(int year, int month)
 {
 	int mdays[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
@@ -23,9 +20,44 @@ int date(int year, int month)
 	return day;
 }
 
-void current() 
+// Current 타이머를 만드는 함수
+int createCurrent(timer_t *timerID, int sec, int msec){
+	struct sigevent te;
+	struct itimerspec its;
+	struct sigaction sa;
+	int sigNo=SIGRTMIN;
+
+	sa.sa_flags=SA_SIGINFO;
+	sa.sa_sigaction = current;
+	sigemptyset(&sa.sa_mask);
+
+	if(sigaction(sigNo, &sa, NULL)== -1 ){
+		printf("sigaction error\n");
+		return -1;
+	}
+	te.sigev_notify = SIGEV_SIGNAL;  
+  	te.sigev_signo = sigNo;  
+	te.sigev_value.sival_ptr = timerID;  
+	timer_create(CLOCK_REALTIME, &te, timerID);  
+   
+	its.it_interval.tv_sec = sec;
+	its.it_interval.tv_nsec = msec * 1000000;  
+	its.it_value.tv_sec = sec;
+    
+	its.it_value.tv_nsec = msec * 1000000;
+	timer_settime(*timerID, 0, &its, NULL);  
+   
+	return 0;
+	
+	
+}
+
+// 현재 시간을 매초 업데이트하는 프로세스
+static void current() 
 {
-	current_tm.tm_sec++;
+	
+	current_tm.tm_sec++;	
+	
 	if(current_tm.tm_sec==60){
 		current_tm.tm_sec=0;
 		current_tm.tm_min++;
@@ -56,6 +88,7 @@ void current()
 	}
 }
 
+// 현재 시간을 보여주는 프로세스
 void time_mode()
 {
 	
@@ -86,7 +119,7 @@ void sec_set()
 	//display
 	display_command = PRINT_SEC_SET;	
 	btn = 0;
-	printf("초\n");
+
 }
 
 void hour_set()
@@ -122,7 +155,7 @@ void hour_set()
 	if(mo_info==TIME_MODE) {display_command = PRINT_HOUR_SET;}
 	if(mo_info==ALARM_MODE) {display_command = PRINT_AL_HOUR_SET;}
 	btn = 0;
-	printf("시간\n");
+
 }
 
 void minute_set()
@@ -159,7 +192,7 @@ void minute_set()
 	if(mo_info==TIME_MODE) {display_command = PRINT_MINUTE_SET;}
         	if(mo_info==ALARM_MODE) {display_command = PRINT_AL_MINUTE_SET;}
 	btn = 0;
-	printf("분\n");
+
 }
 
 void year_set()
@@ -178,7 +211,7 @@ void year_set()
 	//display
 	display_command = PRINT_YEAR_SET;
 	btn = 0;
-	printf("연\n");
+
 }
 
 void month_set()
@@ -197,7 +230,6 @@ void month_set()
 	//display
 	display_command = PRINT_MONTH_SET;
 	btn = 0;
-	printf("달\n");
 }
 
 void day_set()
@@ -306,7 +338,7 @@ void alarm_indicator()
 		alarm_info.alarm_power=true;
 		alarm_info.display_alarm_indicator = 'I';
 	}
-	//printf("indicator state : %d\n", alarm_info.alarm_power);
+	
 }
 
 void stopwatch_mode()
@@ -319,10 +351,13 @@ void stopwatch_mode()
                 	}
 
 	
-	//display
+	// Stopwatch에 필요한 기준값 초기화
+	gettimeofday(&st_start, NULL);
+	stop_milisec = 0;
+	stop_sec = 0;
+	stop_min = 0;
 	display_command = PRINT_STOPWATCH_MODE;
 	btn = 0;
-	printf("stopwatch\n");
 }	
 
 void start()
@@ -336,10 +371,16 @@ void start()
 
 
 	//display
+	gettimeofday(&st_tv, NULL);
+	st_tv.tv_sec -= st_start.tv_sec;
+	st_stop.tv_sec = st_tv.tv_sec;
+	st_tm = *localtime(&st_tv.tv_sec);
+	stop_milisec = st_tv.tv_usec/10000;
+	stop_sec = st_tm.tm_sec;
+	stop_min = st_tm.tm_min;
 	display_command = PRINT_START;
-	start_time=clock();
-	stop_milisec=start_time/10;
-	stop_min=stop_sec/60;
+	
+
 	btn = 0;
 }
 
@@ -352,9 +393,9 @@ void lap_time()
 			st_info=START;
 		}
 	
-		//something to do
 		
 		//display
+		
 		display_command = PRINT_LAP_TIME;
 		btn = 0;
 }
@@ -366,6 +407,9 @@ void stop()
 		}
 		if (btn == 'b') {
 			st_info=START;
+			gettimeofday(&st_tv, NULL);
+			st_tv.tv_sec -= st_start.tv_sec;
+			st_start.tv_sec += (st_tv.tv_sec-st_stop.tv_sec);
 		}
 
 	//display
@@ -410,12 +454,7 @@ void turn_on()
 	
 }
 
-void idle() {
-	if (btn == 'd') {
-		bl_info=TURN_YELLOW;
-	}
-	btn = 0;
-}
+
 
 void turn_yellow() {
 
@@ -437,14 +476,14 @@ int getch()
 	int c;
 	struct termios oldattr, newattr;
 
-	tcgetattr(STDIN_FILENO, &oldattr);           // 현재 터미널 설정 읽음
+	tcgetattr(STDIN_FILENO, &oldattr);
 	newattr = oldattr;
-	newattr.c_lflag &= ~(ICANON | ECHO);         // CANONICAL과 ECHO 끔
-	newattr.c_cc[VMIN] = 1;                      // 최소 입력 문자 수를 1로 설정
-	newattr.c_cc[VTIME] = 0;                     // 최소 읽기 대기 시간을 0으로 설정
-	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);  // 터미널에 설정 입력
-	c = getchar();                               // 키보드 입력 읽음
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // 원래의 설정으로 복구
+	newattr.c_lflag &= ~(ICANON | ECHO);
+	newattr.c_cc[VMIN] = 1;
+	newattr.c_cc[VTIME] = 0;
+	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);  
+	c = getchar();
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
 	return c;
 }
 
@@ -472,65 +511,103 @@ int kbhit()
 	return 0;
 }
 
+
+void gotoxy(int x, int y) {
+
+     printf("\033[%d;%df",y,x);
+
+     fflush(stdout);
+
+}
+
+
+
 void display(int display_command)
 {
 	//if(bl_info==TURN_YELLOW) printf("%c[1;33m", 27);
 	switch(display_command) {
 		case PRINT_TIME_MODE:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %d-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			usleep(100000);
 			break;
 		case PRINT_SEC_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %d-%d-%d %d:%d:%c[4m%d%c[0m\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, 27, current_tm.tm_sec, 27);
+			usleep(100000);
 			break;
 		case PRINT_HOUR_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);			
 			break;
 		case PRINT_MINUTE_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27, current_tm.tm_sec);
+			usleep(100000);
 			break;
 		case PRINT_YEAR_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			sleep(1);
 			break;
 		case PRINT_MONTH_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			usleep(100000);
 			break;
 		case PRINT_DAY_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("%s %c %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			usleep(100000);
 			break;
 		case PRINT_ALARM_MODE:
 			system("clear");
+			gotoxy(70,20);
 			printf("AL %c %d-%d %d:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, alarm_tm.tm_min);
+			usleep(100000);
 			break;
 		case PRINT_AL_HOUR_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("AL %c %d-%d %c[4m%d%c[0m:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27, alarm_tm.tm_min);
-			
+			usleep(100000);			
 			break;
 		case PRINT_AL_MINUTE_SET:
 			system("clear");
+			gotoxy(70,20);
 			printf("AL %c %d-%d %d:%c[4m%d%c[0m\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, 27, alarm_tm.tm_min, 27);
+			usleep(100000);
 			break;
 		case PRINT_STOPWATCH_MODE:
 			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			gotoxy(70,20);
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
+			usleep(100000);
 			break;
 		case PRINT_START:
 			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			gotoxy(70,20);
+			printf("ST %d-%d %d:%d:%02d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
+			usleep(100000);
 			break;
 		case PRINT_STOP:
 			system("clear");
-			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec);
+			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
+			usleep(100000);
 			break;
 		case PRINT_LAP_TIME:
 			system("clear");
+			gotoxy(70,20);
+			printf("ST %d-%d %d:%d:%02d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
+			usleep(100000);
 			break;
 		default: break;
 	}

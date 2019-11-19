@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <fcntl.h>
+#include <signal.h>
 
 //status
 #define TIME_MODE 1
@@ -49,34 +50,43 @@
 
 typedef struct _alarm_information{
    bool alarm_power; // 알람 켜짐 여부
-   char display_alarm_indicator;
+   char display_alarm_indicator; // Alarm indicator on/off 여부
    int beep_time;
 }alarm_information;
 
-int st_info;
-int al_info;
-int mo_info;
-int bl_info;
-int backlight_time;
+// Data storage
+int st_info; //Status information
+int al_info; //Alarm information
+int mo_info; //mode information
+int bl_info; //backlight information
+
+
+int backlight_time; // 2sec
 int display_command;
-int btn;
+int btn; // button input storage
+
 time_t current_time;
 time_t alarm_time;
+
 struct tm current_tm;
 struct tm alarm_tm;
+struct tm st_tm;
+struct timeval st_tv;
+struct timeval st_start;
+struct timeval st_stop;
 
 // 스톱워치 변수
 unsigned int stop_min;
 unsigned int stop_sec;
 unsigned int stop_milisec;
-clock_t start_time;
-clock_t stop_time;
 
-// backlight flag
-bool bl_flag;
 
+
+
+// 함수 및 프로세스
+int createCurrent(timer_t *timerID, int sec, int msec);
 int date(int year, int month);
-void current();
+static void current();
 void time_mode();
 void sec_set();
 void hour_set();
@@ -94,9 +104,9 @@ void start();
 void stopwatch_mode();
 void turn_on();
 void turn_off();
-void idle();
 void turn_yellow();
 void btn_input();
 int getch();
 int kbhit();
+void gotoxy(int x, int y);
 void display(int display_command);
