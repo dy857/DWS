@@ -33,7 +33,6 @@ void main() {
 	timer_t timerID;
 	createCurrent(&timerID,1,0);
 
-
 	while (1) {
 			
 
@@ -46,8 +45,9 @@ void main() {
 		if (al_info == TURN_ON) turn_on();
 
 		// Backlight Controller
-	        if (btn =='d' && bl_info == 0) idle();
+	       if (btn =='d' && bl_info == 0) idle();
      		if (bl_info == TURN_YELLOW) turn_yellow();
+		
 		
 		// Main Controller
 		if(mo_info==TIME_MODE)

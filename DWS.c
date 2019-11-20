@@ -471,18 +471,22 @@ void btn_input();
 
 int getch()
 {
-	int c;
-	struct termios oldattr, newattr;
+   int c[4];
+   int max = c[0];
+   for(int i = 0; i<4;i++){
+      if(max>c[i])max=c[i];
+   }
+   struct termios oldattr, newattr;
 
-	tcgetattr(STDIN_FILENO, &oldattr);
-	newattr = oldattr;
-	newattr.c_lflag &= ~(ICANON | ECHO);
-	newattr.c_cc[VMIN] = 1;
-	newattr.c_cc[VTIME] = 0;
-	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);  
-	c = getchar();
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
-	return c;
+   tcgetattr(STDIN_FILENO, &oldattr);
+   newattr = oldattr;
+   newattr.c_lflag &= ~(ICANON | ECHO);
+   newattr.c_cc[VMIN] = 1;
+   newattr.c_cc[VTIME] = 0;
+   tcsetattr(STDIN_FILENO, TCSANOW, &newattr);  
+   max = getchar();
+   tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
+   return max;
 }
 
 
@@ -526,7 +530,7 @@ void display(int display_command)
 	switch(display_command) {
 
 		case PRINT_BACKLIGHT:
-         		if(backlight_time<5) {
+         		if(backlight_time<10) {
             			printf("%c[1;33m", 27);
          		   	backlight_time++;
       			}   
@@ -552,31 +556,56 @@ void display(int display_command)
 		case PRINT_HOUR_SET:
 			system("clear");
 			gotoxy(70,20);
-			printf("%s %c %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27, current_tm.tm_min, current_tm.tm_sec);
-			sleep(1);			
+			if(backlight_time==0){
+				printf("%s %c %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27, current_tm.tm_min, current_tm.tm_sec);
+			}else{
+				printf("%s %c %d-%d-%d %c[4m%d%c[0m", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27);
+				printf("%c[1;33m:%d:%d%c[0m\n",27, current_tm.tm_min, current_tm.tm_sec, 27);
+			}
+			usleep(100000);			
 			break;
 		case PRINT_MINUTE_SET:
 			system("clear");
 			gotoxy(70,20);
-			printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27, current_tm.tm_sec);
+			if(backlight_time==0){
+				printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27, current_tm.tm_sec);
+			}else{
+				printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27);
+				printf("%c[1;33m:%d%c[0m\n",27, current_tm.tm_sec, 27);
+			}
 			usleep(100000);
 			break;
 		case PRINT_YEAR_SET:
 			system("clear");
 			gotoxy(70,20);
-			printf("%s %c %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
-			sleep(1);
+			if(backlight_time==0){
+				printf("%s %c %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			}else{
+				printf("%s %c %c[4m%d%c[0m", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27);
+				printf("%c[1;33m-%d-%d %d:%d:%d%c[0m\n", 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec,27);
+			}
+			usleep(100000);
 			break;
 		case PRINT_MONTH_SET:
 			system("clear");
 			gotoxy(70,20);
-			printf("%s %c %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			if(backlight_time==0){
+				printf("%s %c %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			}else{
+				printf("%s %c %d-%c[4m%d%c[0m", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27);
+				printf("%c[1;33m-%d %d:%d:%d\n%c[0m",27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec, 27);
+			}
 			usleep(100000);
 			break;
 		case PRINT_DAY_SET:
 			system("clear");
 			gotoxy(70,20);
-			printf("%s %c %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			if(backlight_time==0){
+				printf("%s %c %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
+			}else{
+				printf("%s %c %d-%d-%c[4m%d%c[0m", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27);
+				printf("%c[1;33m %d:%d:%d\n%c[0m",27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec, 27);
+			}
 			usleep(100000);
 			break;
 		case PRINT_ALARM_MODE:
@@ -588,7 +617,12 @@ void display(int display_command)
 		case PRINT_AL_HOUR_SET:
 			system("clear");
 			gotoxy(70,20);
-			printf("AL %c %d-%d %c[4m%d%c[0m:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27, alarm_tm.tm_min);
+			if(backlight_time==0){	
+				printf("AL %c %d-%d %c[4m%d%c[0m:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27, alarm_tm.tm_min);
+			}else{
+				printf("AL %c %d-%d %c[4m%d%c[0m", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27);
+				printf("%c[1;33m:%d\n%c[0m",27, alarm_tm.tm_min, 27);
+			}
 			usleep(100000);			
 			break;
 		case PRINT_AL_MINUTE_SET:
@@ -611,6 +645,7 @@ void display(int display_command)
 			break;
 		case PRINT_STOP:
 			system("clear");
+			gotoxy(70,20);
 			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
 			usleep(100000);
 			break;
