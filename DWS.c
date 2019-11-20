@@ -80,7 +80,7 @@ static void current()
 		current_tm.tm_mon++;
 	}
 	else if(current_tm.tm_mon==12){
-		current_tm.tm_mon=1;
+		current_tm.tm_mon=0;
 		current_tm.tm_year++;
 	}
 	else if(current_tm.tm_year==2099){
@@ -263,9 +263,11 @@ void plus_one(int st_info)
 		case MINUTE_SET: 
 			current_tm.tm_min++; break;
 		case YEAR_SET: 
-			current_tm.tm_year++; break;
+			current_tm.tm_year++;
+			break;
 		case MONTH_SET: 
-			current_tm.tm_mon++; break;
+			current_tm.tm_wday =(current_tm.tm_sec-(current_tm.tm_mon++)) % 7;
+			break;
 		case DAY_SET:
 			current_tm.tm_mday++;
 			if(current_tm.tm_wday==6) current_tm.tm_wday=0;
@@ -293,10 +295,12 @@ void set_min(int st_info)
 			current_tm.tm_min = 0;
 			break;
 		case YEAR_SET:
-			current_tm.tm_year = 2019;
+			current_tm.tm_year = 119;
+			current_tm.tm_wday =(current_tm.tm_sec-(current_tm.tm_year++)) % 7;
 			break;
 		case MONTH_SET:
 			current_tm.tm_mon = 1;
+			current_tm.tm_wday =(current_tm.tm_sec-(current_tm.tm_mon++)) % 7;
 			break;
 		case DAY_SET:
 			current_tm.tm_mday = 1;
@@ -543,19 +547,16 @@ void display(int display_command)
          		break;
 		case PRINT_TIME_MODE:
 			system("clear");
-			gotoxy(70,20);
 			printf("%s %c %d-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
 			usleep(100000);
 			break;
 		case PRINT_SEC_SET:
 			system("clear");
-			gotoxy(70,20);
 			printf("%s %c %d-%d-%d %d:%d:%c[4m%d%c[0m\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, 27, current_tm.tm_sec, 27);
 			usleep(100000);
 			break;
 		case PRINT_HOUR_SET:
 			system("clear");
-			gotoxy(70,20);
 			if(backlight_time==0){
 				printf("%s %c %d-%d-%d %c[4m%d%c[0m:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, 27, current_tm.tm_hour, 27, current_tm.tm_min, current_tm.tm_sec);
 			}else{
@@ -566,7 +567,6 @@ void display(int display_command)
 			break;
 		case PRINT_MINUTE_SET:
 			system("clear");
-			gotoxy(70,20);
 			if(backlight_time==0){
 				printf("%s %c %d-%d-%d %d:%c[4m%d%c[0m:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, 27, current_tm.tm_min, 27, current_tm.tm_sec);
 			}else{
@@ -577,7 +577,6 @@ void display(int display_command)
 			break;
 		case PRINT_YEAR_SET:
 			system("clear");
-			gotoxy(70,20);
 			if(backlight_time==0){
 				printf("%s %c %c[4m%d%c[0m-%d-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, 27, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
 			}else{
@@ -588,7 +587,6 @@ void display(int display_command)
 			break;
 		case PRINT_MONTH_SET:
 			system("clear");
-			gotoxy(70,20);
 			if(backlight_time==0){
 				printf("%s %c %d-%c[4m%d%c[0m-%d %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, 27, current_tm.tm_mon + 1, 27, current_tm.tm_mday, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
 			}else{
@@ -599,7 +597,6 @@ void display(int display_command)
 			break;
 		case PRINT_DAY_SET:
 			system("clear");
-			gotoxy(70,20);
 			if(backlight_time==0){
 				printf("%s %c %d-%d-%c[4m%d%c[0m %d:%d:%d\n", week_day[current_tm.tm_wday], alarm_info.display_alarm_indicator, current_tm.tm_year + 1900, current_tm.tm_mon + 1, 27, current_tm.tm_mday, 27, current_tm.tm_hour, current_tm.tm_min, current_tm.tm_sec);
 			}else{
@@ -610,13 +607,11 @@ void display(int display_command)
 			break;
 		case PRINT_ALARM_MODE:
 			system("clear");
-			gotoxy(70,20);
 			printf("AL %c %d-%d %d:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, alarm_tm.tm_min);
 			usleep(100000);
 			break;
 		case PRINT_AL_HOUR_SET:
 			system("clear");
-			gotoxy(70,20);
 			if(backlight_time==0){	
 				printf("AL %c %d-%d %c[4m%d%c[0m:%d\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, 27, alarm_tm.tm_hour, 27, alarm_tm.tm_min);
 			}else{
@@ -627,31 +622,26 @@ void display(int display_command)
 			break;
 		case PRINT_AL_MINUTE_SET:
 			system("clear");
-			gotoxy(70,20);
 			printf("AL %c %d-%d %d:%c[4m%d%c[0m\n", alarm_info.display_alarm_indicator, current_tm.tm_mon + 1, current_tm.tm_mday, alarm_tm.tm_hour, 27, alarm_tm.tm_min, 27);
 			usleep(100000);
 			break;
 		case PRINT_STOPWATCH_MODE:
 			system("clear");
-			gotoxy(70,20);
 			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
 			usleep(100000);
 			break;
 		case PRINT_START:
 			system("clear");
-			gotoxy(70,20);
 			printf("ST %d-%d %d:%d:%02d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
 			usleep(100000);
 			break;
 		case PRINT_STOP:
 			system("clear");
-			gotoxy(70,20);
 			printf("ST %d-%d %d:%d:%d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
 			usleep(100000);
 			break;
 		case PRINT_LAP_TIME:
 			system("clear");
-			gotoxy(70,20);
 			printf("ST %d-%d %d:%d:%02d\n", current_tm.tm_hour, current_tm.tm_min, stop_min, stop_sec, stop_milisec%100);
 			usleep(100000);
 			break;

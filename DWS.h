@@ -67,9 +67,11 @@ int btn; // button input storage
 
 time_t current_time;
 time_t alarm_time;
+time_t temp_time;
 
 struct tm current_tm;
 struct tm alarm_tm;
+struct tm temp_tm;
 struct tm st_tm;
 struct timeval st_tv;
 struct timeval st_start;
