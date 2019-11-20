@@ -451,23 +451,21 @@ void turn_on()
 		al_info = TURN_OFF;
 	}
 	btn = 0;
-	
 }
 
-
+void idle() {
+   if (btn == 'd') {
+      bl_info=TURN_YELLOW;
+   }
+   btn = 0;
+}
 
 void turn_yellow() {
 
-	if(backlight_time<2) {
-		printf("%c[1;33m", 27);
-		backlight_time++;
-	}
-	else {
-		backlight_time = 0;
-		bl_info=0;
-		printf("%c[0m", 27);
-	}
+   display(PRINT_BACKLIGHT);
+	
 }
+
 
 void btn_input();
 
@@ -526,6 +524,19 @@ void display(int display_command)
 {
 	//if(bl_info==TURN_YELLOW) printf("%c[1;33m", 27);
 	switch(display_command) {
+
+		case PRINT_BACKLIGHT:
+         		if(backlight_time<5) {
+            			printf("%c[1;33m", 27);
+         		   	backlight_time++;
+      			}   
+      			else {
+            			backlight_time = 0;
+            			bl_info=0;
+		                printf("%c[0m", 27);
+       			}   
+   			usleep(100000);
+         		break;
 		case PRINT_TIME_MODE:
 			system("clear");
 			gotoxy(70,20);

@@ -45,7 +45,7 @@
 #define PRINT_START 31
 #define PRINT_STOP 32
 #define PRINT_LAP_TIME 33
-
+#define PRINT_BACKLIGHT 34
 
 
 typedef struct _alarm_information{
@@ -104,6 +104,7 @@ void start();
 void stopwatch_mode();
 void turn_on();
 void turn_off();
+void idle();
 void turn_yellow();
 void btn_input();
 int getch();

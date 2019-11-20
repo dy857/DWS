@@ -45,6 +45,10 @@ void main() {
 		if (al_info == TURN_OFF) turn_off(); 
 		if (al_info == TURN_ON) turn_on();
 
+		// Backlight Controller
+	        if (btn =='d' && bl_info == 0) idle();
+     		if (bl_info == TURN_YELLOW) turn_yellow();
+		
 		// Main Controller
 		if(mo_info==TIME_MODE)
 		{
@@ -72,9 +76,6 @@ void main() {
 			if(st_info == STOP) stop();
 			
 		}
-		// Backlight Controller
-		
-		if (bl_info == TURN_YELLOW) turn_yellow();
 		
 		display(display_command);	
 		
