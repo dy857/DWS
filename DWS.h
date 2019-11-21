@@ -88,6 +88,7 @@ unsigned int stop_milisec;
 // 함수 및 프로세스
 int createCurrent(timer_t *timerID, int sec, int msec);
 int date(int year, int month);
+long total_days(int year, int month, int day);
 static void current();
 void time_mode();
 void sec_set();
